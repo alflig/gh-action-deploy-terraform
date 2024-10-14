@@ -23,27 +23,28 @@ runs:
   using: composite
   steps:
     - name: Find version of Terraform to use
+      working-directory: ${{ inputs.environment }}
       shell: bash
       id: tfversion
       run: |
         GET_CURRENT_TF_VERSION=$(grep required_version providers.tf | sort -u | tail -1 | cut -d= -f2- | xargs)
         echo CURRENT_TF_VERSION=$GET_CURRENT_TF_VERSION >> $GITHUB_ENV
-      working-directory: ${{ inputs.deployments-root-directory }}/${{ inputs.environment }}
 
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
           terraform_version: ${{ env.CURRENT_TF_VERSION }}
           terraform_wrapper: true
-      working-directory: ${{ inputs.deployments-root-directory }}/${{ inputs.environment }}
+      working-directory: ${{ inputs.environment }}
 
     - name: TF Format
+      working-directory: ${{ inputs.environment }}
       shell: bash
       id: fmt
       run: terraform -v; terraform fmt -check -recursive
-      working-directory: ${{ inputs.deployments-root-directory }}/${{ inputs.environment }}
       
     - name: Terraform Init
+      working-directory: ${{ inputs.environment }}
       shell: bash
       id: init
       run: >
@@ -52,28 +53,29 @@ runs:
         -backend-config="use_oidc=true"
         -backend-config="container_name=${{ inputs.environment }}"
         -backend-config="key=${{ inputs.environment }}.tfstate"
-        -backend-config="storage_account_name=${{ vars.tf-storage-account-name }}"
+        -backend-config="storage_account_name=${{ inputs.tf-storage-account-name }}"
         -backend-config="tenant_id=${{ vars.TENANT_ID }}"
         -backend-config="subscription_id=${{ vars.SUBSCRIPTION_ID }}"
         -backend-config="client_id=${{ inputs.APP_ID }}"
-      working-directory: ${{ inputs.deployments-root-directory }}/${{ inputs.environment }}
 
     - name: Terraform Validate
+      working-directory: ${{ inputs.environment }}
       shell: bash
       id: validate
       run: terraform validate
-      working-directory: ${{ inputs.deployments-root-directory }}/${{ inputs.environment }}
+      
   
     - name: TF Plan
+      working-directory: ${{ inputs.environment }}
       shell: bash
       id: tfplan
       run: |
         terraform plan -out ${{ inputs.environment }}.tfplan -lock-timeout=3000s
         sed -i -e '1s/^/```diff\n/' -e '$a```' -e 's/~/!/g' -e 's/^[ \t]*//' ${{ inputs.environment }}.tfplan
         echo "tfplan=${{ inputs.environment }}.tfplan" >> "$GITHUB_OUTPUT"
-      working-directory: ${{ inputs.deployments-root-directory }}/${{ inputs.environment }}
 
     - name: Comment terraform plan
+      working-directory: ${{ inputs.environment }}
       id: deployment-comment
       if: ${{ inputs.tf-plan }} == 'true'
       uses: mshick/add-pr-comment@v2
@@ -81,11 +83,10 @@ runs:
         message-id: ${{ steps.tfplan.outputs.tfplan }}
         message-path: |
          ${{ inputs.environment }}.tfplan
-      working-directory: ${{ inputs.deployments-root-directory }}/${{ inputs.environment }}
 
     - name: TF Apply
+      working-directory: ${{ inputs.environment }}
       if: ${{ inputs.tf-plan }} == 'true' && ${{ inputs.tf-apply }} == 'true'
       shell: bash
       id: tfapply
       run: terraform apply -lock-timeout=3000s -auto-approve
-      working-directory: ${{ inputs.deployments-root-directory }}/${{ inputs.environment }}
