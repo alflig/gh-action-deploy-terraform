@@ -31,11 +31,11 @@ runs:
         echo CURRENT_TF_VERSION=$GET_CURRENT_TF_VERSION >> $GITHUB_ENV
 
     - name: Setup Terraform
+      working-directory: ${{ inputs.environment }}
       uses: hashicorp/setup-terraform@v3
       with:
           terraform_version: ${{ env.CURRENT_TF_VERSION }}
           terraform_wrapper: true
-      working-directory: ${{ inputs.environment }}
 
     - name: TF Format
       working-directory: ${{ inputs.environment }}
