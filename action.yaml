@@ -29,10 +29,9 @@ runs:
       run: |
         GET_CURRENT_TF_VERSION=$(grep required_version providers.tf | sort -u | tail -1 | cut -d= -f2- | xargs)
         echo CURRENT_TF_VERSION=$GET_CURRENT_TF_VERSION >> $GITHUB_ENV
-
-    - name: Setup Terraform
+    
+    - uses: hashicorp/setup-terraform@v3
       working-directory: ${{ inputs.environment }}
-      uses: hashicorp/setup-terraform@v3
       with:
           terraform_version: ${{ env.CURRENT_TF_VERSION }}
           terraform_wrapper: true
@@ -74,11 +73,9 @@ runs:
         sed -i -e '1s/^/```diff\n/' -e '$a```' -e 's/~/!/g' -e 's/^[ \t]*//' ${{ inputs.environment }}.tfplan
         echo "tfplan=${{ inputs.environment }}.tfplan" >> "$GITHUB_OUTPUT"
 
-    - name: Comment terraform plan
+    - uses: mshick/add-pr-comment@v2
       working-directory: ${{ inputs.environment }}
-      id: deployment-comment
       if: ${{ inputs.tf-plan }} == 'true'
-      uses: mshick/add-pr-comment@v2
       with:
         message-id: ${{ steps.tfplan.outputs.tfplan }}
         message-path: |
