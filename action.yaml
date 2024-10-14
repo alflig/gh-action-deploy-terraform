@@ -68,23 +68,23 @@ runs:
       shell: bash
       id: tfplan
       run: |
-        terraform plan -out ${{ inputs.ENVIRONMENT }}.tfplan -lock-timeout=3000s
-        sed -i -e '1s/^/```diff\n/' -e '$a```' -e 's/~/!/g' -e 's/^[ \t]*//' ${{ inputs.ENVIRONMENT }}.tfplan
-        echo "tfplan=${{ inputs.ENVIRONMENT }}.tfplan" >> "$GITHUB_OUTPUT"
+        terraform plan -out ${{ inputs.environment }}.tfplan -lock-timeout=3000s
+        sed -i -e '1s/^/```diff\n/' -e '$a```' -e 's/~/!/g' -e 's/^[ \t]*//' ${{ inputs.environment }}.tfplan
+        echo "tfplan=${{ inputs.environment }}.tfplan" >> "$GITHUB_OUTPUT"
       working-directory: ${{ inputs.deployments-root-directory }}/${{ inputs.environment }}
 
     - name: Comment terraform plan
       id: deployment-comment
-      if: inputs.tf-plan == 'true'
+      if: ${{ inputs.tf-plan }} == 'true'
       uses: mshick/add-pr-comment@v2
       with:
         message-id: ${{ steps.tfplan.outputs.tfplan }}
         message-path: |
-         ${{ inputs.ENVIRONMENT }}.tfplan
+         ${{ inputs.environment }}.tfplan
       working-directory: ${{ inputs.deployments-root-directory }}/${{ inputs.environment }}
 
     - name: TF Apply
-      if: inputs.tf-plan == 'true' && inputs.tf-apply == 'true'
+      if: ${{ inputs.tf-plan }} == 'true' && ${{ inputs.tf-apply }} == 'true'
       shell: bash
       id: tfapply
       run: terraform apply -lock-timeout=3000s -auto-approve
