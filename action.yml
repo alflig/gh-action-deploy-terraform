@@ -33,7 +33,7 @@ runs:
   using: 'composite'   
   steps:
     - name: Find version of Terraform to use
-      working-directory: ${{ inputs.workdir }}
+      working-directory: ${{ inputs.workdir }}/${{ inputs.workdir }}
       shell: bash
       id: tfversion
       run: |
