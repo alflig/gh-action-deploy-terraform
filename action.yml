@@ -33,7 +33,7 @@ runs:
   using: 'composite'   
   steps:
     - name: Find version of Terraform to use
-      working-directory: ${{ inputs.workdir }}/${{ inputs.workdir }}
+      working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
       shell: bash
       id: tfversion
       run: |
@@ -44,16 +44,17 @@ runs:
       with:
           terraform_version: ${{ env.CURRENT_TF_VERSION }}
           terraform_wrapper: true
-          working-directory: ${{ inputs.workdir }}
+          working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
+      shell: bash
 
     - name: TF Format
-      working-directory: ${{ inputs.workdir }}
+      working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
       shell: bash
       id: fmt
       run: terraform -v; terraform fmt -check -recursive
       
     - name: Terraform Init
-      working-directory: ${{ inputs.workdir }}
+      working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
       shell: bash
       id: init
       run: >
@@ -68,13 +69,13 @@ runs:
         -backend-config="client_id=${{ inputs.APP_ID }}"
 
     - name: Terraform Validate
-      working-directory: ${{ inputs.workdir }}
+      working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
       shell: bash
       id: validate
       run: terraform validate
       
     - name: TF Plan
-      working-directory: ${{ inputs.workdir }}
+      working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
       shell: bash
       id: tfplan
       run: |
@@ -88,10 +89,10 @@ runs:
         message-id: ${{ steps.tfplan.outputs.tfplan }}
         message-path: |
          ${{ inputs.environment }}.tfplan
-        working-directory: ${{ inputs.workdir }}
+        working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
 
     - name: TF Apply
-      working-directory: ${{ inputs.workdir }}
+      working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
       shell: bash
       if: ${{ inputs.tf-plan }} == 'true' && ${{ inputs.tf-apply }} == 'true'
       id: tfapply
