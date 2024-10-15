@@ -24,6 +24,7 @@ inputs:
   workdir:
     required: false
     description: The working directory to run the terraform commands
+    default: terraform-deployments
 
 
 runs:
