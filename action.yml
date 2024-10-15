@@ -82,8 +82,9 @@ runs:
       id: tfplan
       run: |
         terraform plan -out=${{ inputs.environment }}.tfplan -lock-timeout=3000s
-        terraform show -no-color ${{ inputs.environment }}.tfplan > ${{ inputs.environment }}.txt
-        echo "tfplan=${{ inputs.environment }}.txt" >> "$GITHUB_OUTPUT"
+        terraform show -no-color ${{ inputs.environment }}.tfplan > ${{ inputs.environment }}.md
+        sed -i -e '1s/^/```diff\n/' -e '$a```' -e 's/~/!/g' -e 's/^[ \t]*//' ${{ inputs.environment }}.md
+        echo "tfplan=${{ inputs.environment }}.md" >> "$GITHUB_OUTPUT"
 
 
     - uses: mshick/add-pr-comment@v2
@@ -91,7 +92,7 @@ runs:
       with:
         message-id: ${{ steps.tfplan.outputs.json }}
         message-path: |
-         ${{ inputs.workdir }}/${{ inputs.environment }}/${{ inputs.environment }}.txt
+         ${{ inputs.workdir }}/${{ inputs.environment }}/${{ inputs.environment }}.md
       
     - name: TF Apply
       working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
