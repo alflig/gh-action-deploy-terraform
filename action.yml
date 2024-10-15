@@ -86,7 +86,6 @@ runs:
         sed -i -e '1s/^/```diff\n/' -e '$a```' -e 's/~/!/g' -e 's/^[ \t]*//' ${{ inputs.environment }}.md
         echo "tfplan=${{ inputs.environment }}.md" >> "$GITHUB_OUTPUT"
 
-
     - uses: mshick/add-pr-comment@v2
       if: inputs.tf-plan == 'true'
       with:
