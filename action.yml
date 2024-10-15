@@ -83,20 +83,20 @@ runs:
       id: tfplan
       run: |
         terraform plan -out ${{ inputs.environment }}.tfplan -lock-timeout=3000s
-        sed -i -e '1s/^/```diff\n/' -e '$a```' -e 's/~/!/g' -e 's/^[ \t]*//' ${{ inputs.environment }}.tfplan
         echo "tfplan=${{ inputs.environment }}.tfplan" >> "$GITHUB_OUTPUT"
 
     - uses: mshick/add-pr-comment@v2
-      if: ${{ inputs.tf-plan }} == 'true'
+      if: inputs.tf-plan == 'true'
       with:
         message-id: ${{ steps.tfplan.outputs.tfplan }}
         message-path: |
          ${{ inputs.workdir }}/${{ inputs.environment }}/${{ inputs.environment }}.tfplan
       
-
     - name: TF Apply
       working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
+      env: 
+        ARM_SUBSCRIPTION_ID: ${{ inputs.SUBSCRIPTION_ID }}
       shell: bash
-      if: ${{ inputs.tf-plan }} == 'true' && ${{ inputs.tf-apply }} == 'true'
+      if: inputs.tf-apply == 'true'
       id: tfapply
       run: terraform apply -lock-timeout=3000s -auto-approve
