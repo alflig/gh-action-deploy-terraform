@@ -11,10 +11,6 @@ on:
         required: true
         description: Storage account name
         type: string
-      tf-plan:
-        type: boolean
-        required: true
-        description: wether to plan or apply
       tf-apply:
         type: boolean
         required: true
@@ -78,13 +74,13 @@ jobs:
         echo "tfplan=${{ inputs.environment }}.tfplan" >> "$GITHUB_OUTPUT"
 
     - uses: mshick/add-pr-comment@v2
-      if: ${{ inputs.tf-plan }} == 'true'
+      if: ${{ inputs.tf-apply }} != 'true'
       with:
         message-id: ${{ steps.tfplan.outputs.tfplan }}
         message-path: |
          ${{ inputs.environment }}.tfplan
 
     - name: TF Apply
-      if: ${{ inputs.tf-plan }} == 'true' && ${{ inputs.tf-apply }} == 'true'
+      if: ${{ inputs.tf-apply }} == 'true'
       id: tfapply
       run: terraform apply -lock-timeout=3000s -auto-approve
