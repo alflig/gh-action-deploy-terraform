@@ -54,6 +54,8 @@ runs:
       
     - name: Terraform Init
       working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
+      env: 
+        ARM_SUBSCRIPTION_ID: ${{ inputs.SUBSCRIPTION_ID }}
       shell: bash
       id: init
       run: >
@@ -75,6 +77,8 @@ runs:
       
     - name: TF Plan
       working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
+      env: 
+        ARM_SUBSCRIPTION_ID: ${{ inputs.SUBSCRIPTION_ID }}
       shell: bash
       id: tfplan
       run: |
