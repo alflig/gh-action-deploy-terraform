@@ -84,12 +84,19 @@ runs:
         terraform plan -out=${{ inputs.environment }}.tfplan -lock-timeout=3000s
         terraform show -no-color ${{ inputs.environment }}.tfplan > ${{ inputs.environment }}.md
         sed -i -e '1s/^/```diff\n/' -e '$a```' -e 's/~/!/g' -e 's/^[ \t]*//' ${{ inputs.environment }}.md
+
+        echo "**Deployment Environment**: ${{ inputs.environment }}" >> planInfo.md
+        echo "**Commit ID:** $(git rev-parse HEAD)" >> planInfo.md
+        echo "**Commit Message:** $(git log -1 --pretty=%B)" >> planInfo.md
+        cat ${{ inputs.environment }}.md >> planInfo.md
+        mv planInfo.md ${{ inputs.environment }}.md
+
         echo "tfplan=${{ inputs.environment }}.md" >> "$GITHUB_OUTPUT"
 
     - uses: mshick/add-pr-comment@v2
       if: inputs.tf-plan == 'true'
       with:
-        message-id: ${{ steps.tfplan.outputs.json }}
+        message-id: ${{ inputs.environment }}.md
         message-path: |
          ${{ inputs.workdir }}/${{ inputs.environment }}/${{ inputs.environment }}.md
       
