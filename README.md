@@ -5,6 +5,11 @@ Github reusable action to deploy Terraform
 
 ## Usage Terraform plan
 
+## Installation and setup.
+
+
+
+
 ```yaml
 name: Plan Bicep deployments
 
@@ -162,7 +167,7 @@ jobs:
           tenant-id: ${{ vars.TENANT_ID }}
           subscription-id: ${{ vars.SUBSCRIPTION_ID }}
 
-      - name: Plan Terraform deployments
+      - name: Apply Terraform deployments
         uses: alflig/gh-action-deploy-terraform@main
         with:
           tf-storage-account-name: ${{ vars.TF_STORAGE_ACCOUNT_NAME }}
