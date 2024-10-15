@@ -137,7 +137,7 @@ jobs:
       environments: ${{ steps.get-environments.outputs.environments }}
           
         
-  plan-terraform-parallel:
+  apply-terraform-parallel:
     name: "[${{ matrix.environment }}]Apply Terraform deployments"
     needs: get-environments
     strategy:
