@@ -45,7 +45,6 @@ runs:
           terraform_version: ${{ env.CURRENT_TF_VERSION }}
           terraform_wrapper: true
           working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
-      shell: bash
 
     - name: TF Format
       working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
