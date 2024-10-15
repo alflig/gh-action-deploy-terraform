@@ -82,15 +82,16 @@ runs:
       id: tfplan
       run: |
         terraform plan -out=${{ inputs.environment }}.tfplan -lock-timeout=3000s
-        terraform show -json ${{ inputs.environment }}.tfplan > ${{ inputs.environment }}.json
-        echo "tfplan=${{ inputs.environment }}.md" >> "$GITHUB_OUTPUT"
+        terraform show -no-color ${{ inputs.environment }}.tfplan > ${{ inputs.environment }}.txt
+        echo "tfplan=${{ inputs.environment }}.txt" >> "$GITHUB_OUTPUT"
+
 
     - uses: mshick/add-pr-comment@v2
       if: inputs.tf-plan == 'true'
       with:
         message-id: ${{ steps.tfplan.outputs.json }}
         message-path: |
-         ${{ inputs.workdir }}/${{ inputs.environment }}/${{ inputs.environment }}.json
+         ${{ inputs.workdir }}/${{ inputs.environment }}/${{ inputs.environment }}.txt
       
     - name: TF Apply
       working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
