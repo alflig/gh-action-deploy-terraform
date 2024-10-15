@@ -9,9 +9,6 @@ inputs:
   tf-storage-account-name:
     required: true
     description: Storage account name
-  tf-plan:
-    required: true
-    description: wether to plan or apply
   tf-apply:
     required: true
     description: wether to plan or apply
@@ -94,7 +91,7 @@ runs:
         echo "tfplan=${{ inputs.environment }}.md" >> "$GITHUB_OUTPUT"
 
     - uses: mshick/add-pr-comment@v2
-      if: inputs.tf-plan == 'true'
+      if: inputs.tf-apply != 'true'
       with:
         message-id: ${{ inputs.environment }}.md
         message-path: |

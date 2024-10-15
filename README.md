@@ -7,9 +7,6 @@ Github reusable action to deploy Terraform
 
 ## Installation and setup.
 
-
-
-
 ```yaml
 name: Plan Bicep deployments
 
@@ -88,7 +85,6 @@ jobs:
         uses: alflig/gh-action-deploy-terraform@main
         with:
           tf-storage-account-name: ${{ vars.TF_STORAGE_ACCOUNT_NAME }}
-          tf-plan: true
           tf-apply: false
           environment: ${{ matrix.environment }}
           workdir: ${{ env.working-directory }}
@@ -171,7 +167,6 @@ jobs:
         uses: alflig/gh-action-deploy-terraform@main
         with:
           tf-storage-account-name: ${{ vars.TF_STORAGE_ACCOUNT_NAME }}
-          tf-plan: true
           tf-apply: true
           environment: ${{ matrix.environment }}
           workdir: ${{ env.working-directory }}
