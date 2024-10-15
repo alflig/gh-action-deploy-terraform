@@ -1,0 +1,101 @@
+name: Plan and Apply Terraform code
+
+description: Github action workflow to plan and apply Terraform code
+author: 'alflig'
+inputs:
+  environment:
+    description: 'The environment to deploy to'
+    required: true
+  tf-storage-account-name:
+    required: true
+    description: Storage account name
+  tf-plan:
+    required: true
+    description: wether to plan or apply
+  tf-apply:
+    required: true
+    description: wether to plan or apply
+  deployments-root-directory:
+    required: true
+    description: The root directory where the deployments are stored
+  SUBSCRIPTION_ID:
+    required: true
+    description: Azure subscription id
+  TENANT_ID:
+    required: true
+    description: Azure tenant id
+  APP_ID:
+    required: true
+    description: Azure app id
+  workdir:
+    required: false
+    description: The working directory to run the terraform commands
+
+
+runs:
+  using: 'composite'   
+  steps:
+    - name: Find version of Terraform to use
+      working-directory: ${{ inputs.workdir }}
+      shell: bash
+      id: tfversion
+      run: |
+        GET_CURRENT_TF_VERSION=$(grep required_version providers.tf | sort -u | tail -1 | cut -d= -f2- | xargs)
+        echo CURRENT_TF_VERSION=$GET_CURRENT_TF_VERSION >> $GITHUB_ENV
+    
+    - uses: hashicorp/setup-terraform@v3
+      with:
+          terraform_version: ${{ env.CURRENT_TF_VERSION }}
+          terraform_wrapper: true
+          working-directory: ${{ inputs.workdir }}
+
+    - name: TF Format
+      working-directory: ${{ inputs.workdir }}
+      shell: bash
+      id: fmt
+      run: terraform -v; terraform fmt -check -recursive
+      
+    - name: Terraform Init
+      working-directory: ${{ inputs.workdir }}
+      shell: bash
+      id: init
+      run: >
+        terraform init
+        -input=false
+        -backend-config="use_oidc=true"
+        -backend-config="container_name=${{ inputs.environment }}"
+        -backend-config="key=${{ inputs.environment }}.tfstate"
+        -backend-config="storage_account_name=${{ inputs.tf-storage-account-name }}"
+        -backend-config="tenant_id=${{ inputs.TENANT_ID }}"
+        -backend-config="subscription_id=${{ inputs.SUBSCRIPTION_ID }}"
+        -backend-config="client_id=${{ inputs.APP_ID }}"
+
+    - name: Terraform Validate
+      working-directory: ${{ inputs.workdir }}
+      shell: bash
+      id: validate
+      run: terraform validate
+      
+    - name: TF Plan
+      working-directory: ${{ inputs.workdir }}
+      shell: bash
+      id: tfplan
+      run: |
+        terraform plan -out ${{ inputs.environment }}.tfplan -lock-timeout=3000s
+        sed -i -e '1s/^/```diff\n/' -e '$a```' -e 's/~/!/g' -e 's/^[ \t]*//' ${{ inputs.environment }}.tfplan
+        echo "tfplan=${{ inputs.environment }}.tfplan" >> "$GITHUB_OUTPUT"
+
+    - uses: mshick/add-pr-comment@v2
+      if: ${{ inputs.tf-plan }} == 'true'
+      with:
+        message-id: ${{ steps.tfplan.outputs.tfplan }}
+        message-path: |
+         ${{ inputs.environment }}.tfplan
+        working-directory: ${{ inputs.workdir }}
+
+    - name: TF Apply
+      working-directory: ${{ inputs.workdir }}
+      shell: bash
+      if: ${{ inputs.tf-plan }} == 'true' && ${{ inputs.tf-apply }} == 'true'
+      id: tfapply
+      run: terraform apply -lock-timeout=3000s -auto-approve
