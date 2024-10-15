@@ -15,9 +15,6 @@ inputs:
   tf-apply:
     required: true
     description: wether to plan or apply
-  deployments-root-directory:
-    required: true
-    description: The root directory where the deployments are stored
   SUBSCRIPTION_ID:
     required: true
     description: Azure subscription id
