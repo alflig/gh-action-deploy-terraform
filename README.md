@@ -63,6 +63,7 @@ jobs:
       matrix:
         environment: ${{ fromJSON(needs.get-environments.outputs.environments) }}
     runs-on: ubuntu-latest
+    if: needs.get-environments.outputs.environments != '[]'
     permissions:
       id-token: write # Required for the OIDC Login
       contents: read # Required for repo checkout
@@ -145,6 +146,7 @@ jobs:
       matrix:
         environment: ${{ fromJSON(needs.get-environments.outputs.environments) }}
     runs-on: ubuntu-latest
+    if: needs.get-environments.outputs.environments != '[]'
     permissions:
       id-token: write # Required for the OIDC Login
       contents: read # Required for repo checkout
