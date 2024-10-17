@@ -11,7 +11,15 @@ inputs:
     description: Storage account name
   tf-apply:
     required: true
-    description: wether to plan or apply
+    description: wether to plan or apply terraform code
+  tf-format:
+    required: true
+    description: wether to format terraform code
+    default: "true"
+  tf-validate:
+    required: true
+    description: wether to validate terraform code
+    default: "true"
   SUBSCRIPTION_ID:
     required: true
     description: Azure subscription id
@@ -45,9 +53,18 @@ runs:
 
     - name: TF Format
       working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
+      if: inputs.tf-format == 'true'
       shell: bash
       id: fmt
-      run: terraform -v; terraform fmt -check -recursive
+      run: |
+        set -e
+        terraform -v
+        if ! terraform fmt -check -recursive; then
+          echo -e "\033[0;31mError: Terraform fmt failed.\033[0m"
+          echo -e "\033[0;31mPlease run the following command to format your Terraform files before pushing your code:\033[0m"
+          echo -e "\033[0;33mterraform fmt -recursive\033[0m"
+          exit 1
+        fi
       
     - name: Terraform Init
       working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
@@ -67,6 +84,7 @@ runs:
         -backend-config="client_id=${{ inputs.APP_ID }}"
 
     - name: Terraform Validate
+      if: inputs.tf-validate == 'true'
       working-directory: ${{ inputs.workdir }}/${{ inputs.environment }}
       shell: bash
       id: validate
