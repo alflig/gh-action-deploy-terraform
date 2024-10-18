@@ -44,11 +44,8 @@ jobs:
         working-directory: ${{ env.working-directory }}
         id: get-environments
         run: |
-          echo "Current directory:"
-          pwd
-          echo "Contents of the directory:"
           echo "Environments:"
-          environments=$(for dir in */; do echo "\"${dir%/}\""; done | jq -c -s .)
+          environments=$(find . -mindepth 1 -maxdepth 1 -type d -not -path '*/\.*' -exec basename {} \; | jq -R -s -c 'split("\n")[:-1]')
           echo "environments=$environments" >> "$GITHUB_OUTPUT"
           echo $environments
     outputs:
@@ -127,11 +124,8 @@ jobs:
         working-directory: ${{ env.working-directory }}
         id: get-environments
         run: |
-          echo "Current directory:"
-          pwd
-          echo "Contents of the directory:"
           echo "Environments:"
-          environments=$(for dir in */; do echo "\"${dir%/}\""; done | jq -c -s .)
+          environments=$(find . -mindepth 1 -maxdepth 1 -type d -not -path '*/\.*' -exec basename {} \; | jq -R -s -c 'split("\n")[:-1]')
           echo "environments=$environments" >> "$GITHUB_OUTPUT"
           echo $environments
     outputs:
