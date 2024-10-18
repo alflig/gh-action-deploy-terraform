@@ -61,6 +61,7 @@ jobs:
         environment: ${{ fromJSON(needs.get-environments.outputs.environments) }}
     runs-on: ubuntu-latest
     if: needs.get-environments.outputs.environments != '[]'
+  # environment: ${{ matrix.environment }} ### ONLY WORKS FOR GITHUB ORGANIZATIONS. Environments are only available for github orgs.
     permissions:
       id-token: write # Required for the OIDC Login
       contents: read # Required for repo checkout
@@ -141,6 +142,7 @@ jobs:
         environment: ${{ fromJSON(needs.get-environments.outputs.environments) }}
     runs-on: ubuntu-latest
     if: needs.get-environments.outputs.environments != '[]'
+ #  environment: ${{ matrix.environment }} ### ONLY WORKS FOR GITHUB ORGANIZATIONS. Environments are only available for github orgs.
     permissions:
       id-token: write # Required for the OIDC Login
       contents: read # Required for repo checkout
